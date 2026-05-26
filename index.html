@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>あなたの宿命鑑定 -月運読み解き版- by SATSUKI</title>
+  <meta name="description" content="生年月日から算命学の命式を算出し、本質・才能・今月の流れをやさしい言葉で読み解く鑑定アプリ。">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app">
+    <section class="hero">
+      <p class="eyebrow">SATSUKI monthly reading</p>
+      <h1>あなたの宿命鑑定<br><span>-月運読み解き版-</span></h1>
+      <p class="lead">
+        生年月日から命式を算出し、本質・才能・今月のテーマ・これからの流れを、
+        専門用語を知らない方にも届く言葉で読み解きます。
+      </p>
+    </section>
+
+    <section class="input-card" aria-labelledby="formTitle">
+      <div>
+        <h2 id="formTitle">鑑定する</h2>
+        <p>出生時間がわからない場合は空欄で大丈夫です。</p>
+      </div>
+      <form id="readingForm">
+        <label class="field">
+          <span>生年月日</span>
+          <input id="birthDate" type="date" required>
+        </label>
+        <label class="field">
+          <span>出生時間</span>
+          <input id="birthTime" type="time">
+        </label>
+        <label class="field">
+          <span>大きな運の流れ</span>
+          <select id="gender">
+            <option value="female">女性式</option>
+            <option value="male">男性式</option>
+          </select>
+        </label>
+        <button type="submit">読み解く</button>
+      </form>
+      <p class="notice" id="notice" role="status"></p>
+    </section>
+
+    <section class="reading" id="reading" hidden>
+      <div class="reading-head">
+        <div>
+          <p class="eyebrow">Your reading</p>
+          <h2 id="readingTitle">今月の宿命鑑定</h2>
+        </div>
+        <p id="readingDate"></p>
+      </div>
+
+      <div class="card-grid primary-grid" id="primaryCards"></div>
+      <div class="card-grid flow-grid" id="flowCards"></div>
+      <div class="card-grid support-grid" id="supportCards"></div>
+
+      <details class="basis">
+        <summary>鑑定根拠を見る</summary>
+        <div id="basisContent"></div>
+      </details>
+
+      <p class="disclaimer">
+        この鑑定は自己理解と行動整理のための読みものです。人生の大切な判断は、
+        現実の状況や信頼できる専門家の助言も合わせてご検討ください。
+      </p>
+    </section>
+  </main>
+
+  <script src="./sanmeigaku.js"></script>
+  <script>
+    const $ = (selector) => document.querySelector(selector);
+    const api = window.SanmeiGaku;
+
+    const TEN_STAR = {
+      "貫索星": {
+        gift: "自分の軸を守り抜く力",
+        talent: "継続力、専門性、ひとりで深める集中力",
+        shadow: "正しさを握りしめすぎると、助けを受け取りにくくなります。",
+        work: "自分の判断基準を明確にし、重要な仕事を一つずつ固めるほど成果が安定します。",
+        love: "無理に合わせるより、安心して沈黙できる相手との関係が育ちます。",
+        partner: "あなたのペースを尊重しながら、必要な時に外の視点をくれる人",
+        action: "朝一番に今日守りたいことを一つだけ書く"
+      },
+      "石門星": {
+        gift: "人と人をつなぎ、場を温める力",
+        talent: "調整力、紹介力、チームで成果を出す力",
+        shadow: "周囲の期待を読みすぎると、自分の本音が後回しになります。",
+        work: "一人で抱えるより、相談・共有・共同作業に流れがあります。",
+        love: "友人のように自然に話せる関係から、信頼が深まりやすい時です。",
+        partner: "対等に話し合え、あなたの人間関係を狭めない人",
+        action: "会いたい人へ短い近況メッセージを送る"
+      },
+      "鳳閣星": {
+        gift: "自然体で伝え、空気を明るくする力",
+        talent: "言葉、発信、食や暮らしを楽しみに変える力",
+        shadow: "楽な方へ流れすぎると、大切な約束がぼやけます。",
+        work: "説明・発信・見える化が追い風です。難しいことほどやさしい言葉に直しましょう。",
+        love: "笑い合える時間が関係を整えます。完璧な演出より普段着の会話を。",
+        partner: "あなたの自然体を喜び、日常の小さな幸せを分け合える人",
+        action: "おいしいものを丁寧に味わい、感じたことを一言残す"
+      },
+      "調舒星": {
+        gift: "繊細な表現力と、違和感を見逃さない感性",
+        talent: "創作、編集、美意識、深い洞察",
+        shadow: "傷つきやすさを隠すほど、言葉が鋭くなりやすい時があります。",
+        work: "企画・文章・デザイン・改善提案に光があります。感じた違和感は宝物です。",
+        love: "急いで近づくより、心の温度を確かめながら距離を縮めると安心できます。",
+        partner: "あなたの感性を否定せず、静かな時間も大切にできる人",
+        action: "好きな音楽や香りで、心がほどける時間を作る"
+      },
+      "禄存星": {
+        gift: "人を惹きつけ、豊かさを循環させる力",
+        talent: "愛情深さ、面倒見、集客、場づくり",
+        shadow: "与えすぎると、感謝されないことに疲れやすくなります。",
+        work: "人の困りごとを拾うほど信頼が集まります。報酬や条件は先に整えましょう。",
+        love: "愛情表現が届きやすい時。尽くすだけでなく、望みも言葉にしてください。",
+        partner: "受け取るだけでなく、あなたにも惜しみなく返してくれる人",
+        action: "財布や決済アプリを整え、お金の流れを見直す"
+      },
+      "司禄星": {
+        gift: "日々の積み重ねで安心を育てる力",
+        talent: "管理、準備、家計、長期計画、信頼の蓄積",
+        shadow: "心配が強くなると、変化のチャンスを小さく見積もりがちです。",
+        work: "記録・整理・仕組み化が成果につながります。地味な改善ほど効きます。",
+        love: "派手さより誠実さ。生活感覚が合うかどうかを丁寧に見てください。",
+        partner: "約束を守り、毎日の安心を一緒に作れる人",
+        action: "引き出しを一つ整え、必要なものだけを残す"
+      },
+      "車騎星": {
+        gift: "迷いを断ち、行動で道を開く力",
+        talent: "実行力、突破力、勝負勘、スピード",
+        shadow: "急ぎすぎると、味方にしたい人まで置いていくことがあります。",
+        work: "先送りしていたことに着手する好機です。短期集中で結果を取りに行きましょう。",
+        love: "素直な言葉と行動が魅力になります。駆け引きより率直さが効きます。",
+        partner: "決断力を受け止めつつ、熱くなった時に落ち着かせてくれる人",
+        action: "15分だけ体を動かしてから重要な判断をする"
+      },
+      "牽牛星": {
+        gift: "役割を引き受け、信頼に応える力",
+        talent: "責任感、品位、組織力、評価される仕事",
+        shadow: "きちんとしようとするほど、弱音を見せにくくなります。",
+        work: "肩書き・契約・ルール・品質を整えるほど評価が上がります。",
+        love: "誠実な態度が信頼を育てます。形式より、相手を大切に扱う姿勢を。",
+        partner: "尊敬し合え、社会的な姿勢や生活の品格が近い人",
+        action: "服・靴・名刺まわりを整え、外に出る準備をする"
+      },
+      "龍高星": {
+        gift: "変化を求め、未知から学ぶ力",
+        talent: "探求、改革、移動、異文化、発想転換",
+        shadow: "自由を求めすぎると、今ある大切なものを雑に扱いがちです。",
+        work: "新しい学び、調査、移動、改善に運があります。古いやり方を見直しましょう。",
+        love: "新鮮な体験が心を開きます。いつもと違う場所で話すと本音が出やすいです。",
+        partner: "あなたの変化を面白がり、一緒に世界を広げてくれる人",
+        action: "行ったことのない道を歩き、気づいたことをメモする"
+      },
+      "玉堂星": {
+        gift: "知識を受け取り、整えて伝える力",
+        talent: "学習、文章化、伝統、資格、教える力",
+        shadow: "考えすぎると、動く前に答えを完璧にしたくなります。",
+        work: "学び直し、資料作成、専門性の整理に追い風があります。",
+        love: "落ち着いた会話が関係を深めます。価値観を丁寧に聞くほど安心が育ちます。",
+        partner: "知的な対話ができ、あなたの学びを応援してくれる人",
+        action: "読みかけの本を10ページ進め、要点を一つ書く"
+      }
+    };
+
+    const DAY_STEM = {
+      "甲": ["大きな樹", "まっすぐ育ち、時間をかけて信頼を築く人です。目標が定まるほど、迷いなく伸びていけます。"],
+      "乙": ["草花", "しなやかに環境へなじみながら、美しい形を見つける人です。柔らかさの奥に折れない芯があります。"],
+      "丙": ["太陽", "明るさと存在感で周りを照らす人です。隠れるより、見える場所で力が開きます。"],
+      "丁": ["灯火", "小さな灯りのように、人の心へ深く届く人です。集中すると独自の表現が磨かれます。"],
+      "戊": ["山", "大きく構え、周りの拠り所になれる人です。動じない姿勢が信頼を集めます。"],
+      "己": ["田畑", "人や物事を育て、形にする人です。丁寧に手をかけるほど豊かさが増します。"],
+      "庚": ["鉱石", "鍛えられるほど輝く人です。困難を越えることで、判断力と強さが磨かれます。"],
+      "辛": ["宝石", "繊細な美意識と品のある魅力を持つ人です。妥協しない感覚が価値になります。"],
+      "壬": ["海", "大きな流れを読み、自由に広がる人です。制限が少ないほど発想が豊かになります。"],
+      "癸": ["雨", "静かに染み込み、必要なものを潤す人です。観察力とやさしさが深い支えになります。"]
+    };
+
+    const RELATION_WORDS = {
+      peer: "自分軸を整える",
+      output: "表現して外へ出す",
+      wealth: "人やお金との関係を育てる",
+      officer: "責任を引き受けて形にする",
+      resource: "学び直し、内側を満たす"
+    };
+
+    function relationType(starName) {
+      if (["貫索星", "石門星"].includes(starName)) return "peer";
+      if (["鳳閣星", "調舒星"].includes(starName)) return "output";
+      if (["禄存星", "司禄星"].includes(starName)) return "wealth";
+      if (["車騎星", "牽牛星"].includes(starName)) return "officer";
+      return "resource";
+    }
+
+    function formatDate(date) {
+      if (!date) return "";
+      return new Intl.DateTimeFormat("ja-JP", { year: "numeric", month: "long", day: "numeric" }).format(date);
+    }
+
+    function currentMonthlyLuck(chart, now) {
+      const year = now.getFullYear();
+      const months = api.monthlyLucks(chart, year);
+      return months.find((item) => now >= item.start && now < item.end) || months[now.getMonth()] || months[0];
+    }
+
+    function annualLuck(chart, now) {
+      return api.annualLucks(chart, now.getFullYear(), 1)[0];
+    }
+
+    function makeCard(title, body, meta) {
+      return `
+        <article class="reading-card">
+          <p class="card-label">${title}</p>
+          <div class="card-body">${body}</div>
+          ${meta ? `<p class="card-meta">${meta}</p>` : ""}
+        </article>
+      `;
+    }
+
+    function periodText(monthStar, yearStar, label) {
+      const month = TEN_STAR[monthStar] || TEN_STAR["玉堂星"];
+      const year = TEN_STAR[yearStar] || month;
+      const relation = RELATION_WORDS[relationType(monthStar)];
+      const copy = {
+        "今週": `${relation}ことから始めると流れに乗れます。予定を詰め込むより、今いちばん気になっている一件に丁寧に触れてください。`,
+        "28日間": `${month.gift}が育つ期間です。焦って大きく変えるより、小さな選択を毎日そろえることで運が安定します。`,
+        "3か月": `${month.talent}が次の扉になります。今月の気づきを試し、来月以降は人に見える形へ整えていく流れです。`,
+        "半年": `${year.gift}を土台に、生活や仕事の優先順位を組み替える時期です。続けることと手放すことを分けましょう。`,
+        "1年": `${year.talent}を磨く年です。評価を急ぐより、あなたらしい勝ち筋を育てるほど後半に実感が出ます。`
+      };
+      return copy[label];
+    }
+
+    function buildReading(chart) {
+      const now = new Date();
+      const monthLuck = currentMonthlyLuck(chart, now);
+      const yearLuck = annualLuck(chart, now);
+      const center = chart.yang.center.name;
+      const south = chart.yang.south.name;
+      const dayStem = chart.day.stem;
+      const essence = DAY_STEM[dayStem] || DAY_STEM["甲"];
+      const core = TEN_STAR[center] || TEN_STAR["玉堂星"];
+      const talent = TEN_STAR[south] || core;
+      const month = TEN_STAR[monthLuck.tenStar.name] || core;
+      const year = TEN_STAR[yearLuck.tenStar.name] || month;
+
+      $("#reading").hidden = false;
+      $("#readingTitle").textContent = `${essence[0]}の質を持つあなたへ`;
+      $("#readingDate").textContent = `${formatDate(now)} 現在の流れ`;
+
+      $("#primaryCards").innerHTML = [
+        makeCard("本質", `<h3>${essence[0]}のような人</h3><p>${essence[1]}</p><p>${core.gift}も中心にあります。</p>`),
+        makeCard("才能", `<h3>${talent.talent}</h3><p>${talent.gift}を外へ表すほど、あなたの魅力は伝わります。</p>`),
+        makeCard("影のパターン", `<h3>力が偏った時のサイン</h3><p>${core.shadow}</p><p>責めるためではなく、戻る場所を知るためのヒントです。</p>`),
+        makeCard("今月のテーマ", `<h3>${month.gift}</h3><p>${month.work}</p>`, `${formatDate(monthLuck.start)} から ${formatDate(monthLuck.end)} まで`)
+      ].join("");
+
+      $("#flowCards").innerHTML = ["今週", "28日間", "3か月", "半年", "1年"].map((label) => {
+        return makeCard(label, `<p>${periodText(monthLuck.tenStar.name, yearLuck.tenStar.name, label)}</p>`);
+      }).join("");
+
+      $("#supportCards").innerHTML = [
+        makeCard("今月の仕事運", `<p>${month.work}</p><p>キーワードは「${RELATION_WORDS[relationType(monthLuck.tenStar.name)]}」。成果より先に、流れを整える意識が助けになります。</p>`),
+        makeCard("今月の恋愛運", `<p>${month.love}</p>`),
+        makeCard("相性の良いパートナー", `<p>${month.partner}</p><p>長く続く関係では、あなたの本質である「${essence[0]}」のペースを大切にしてくれることが鍵です。</p>`),
+        makeCard("開運アクション", `<p>${month.action}</p>`)
+      ].join("");
+
+      $("#basisContent").innerHTML = `
+        <div class="basis-grid">
+          <div>
+            <h3>命式</h3>
+            <p>年柱：${chart.year.stem}${chart.year.branch}</p>
+            <p>月柱：${chart.month.stem}${chart.month.branch}</p>
+            <p>日柱：${chart.day.stem}${chart.day.branch}</p>
+          </div>
+          <div>
+            <h3>読み解きに使った星</h3>
+            <p>中心：${chart.yang.center.name}</p>
+            <p>才能：${chart.yang.south.name}</p>
+            <p>今月：${monthLuck.stem}${monthLuck.branch} / ${monthLuck.tenStar.name}</p>
+            <p>今年：${yearLuck.stem}${yearLuck.branch} / ${yearLuck.tenStar.name}</p>
+          </div>
+          <div>
+            <h3>補足</h3>
+            <p>本文では専門用語を直接出さず、星の働きを日常の言葉へ翻訳しています。</p>
+            <p>節入り：${monthLuck.sectionName || "今月"} / ${formatDate(monthLuck.start)}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    function setDefaults() {
+      const today = new Date();
+      $("#birthDate").value = "1990-01-01";
+      $("#gender").value = "female";
+      $("#notice").textContent = api ? "" : "sanmeigaku.js を同じ階層に置くと鑑定を実行できます。";
+      if (today.getHours() < 5) $("#birthTime").value = "";
+    }
+
+    $("#readingForm").addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (!api || typeof api.calculateNatal !== "function") {
+        $("#notice").textContent = "sanmeigaku.js が読み込めませんでした。同じ階層に配置してください。";
+        return;
+      }
+      try {
+        const chart = api.calculateNatal({
+          dateValue: $("#birthDate").value,
+          timeValue: $("#birthTime").value || "12:00",
+          gender: $("#gender").value,
+          targetYear: new Date().getFullYear()
+        });
+        $("#notice").textContent = "";
+        buildReading(chart);
+        $("#reading").scrollIntoView({ behavior: "smooth", block: "start" });
+      } catch (error) {
+        $("#notice").textContent = "入力内容を確認してください。鑑定を作成できませんでした。";
+        console.error(error);
+      }
+    });
+
+    setDefaults();
+  </script>
+</body>
+</html>
