@@ -54,6 +54,7 @@
       </div>
 
       <div class="card-grid primary-grid" id="primaryCards"></div>
+      <div class="card-grid mission-grid" id="missionCards"></div>
       <div class="card-grid flow-grid" id="flowCards"></div>
       <div class="card-grid support-grid" id="supportCards"></div>
 
@@ -180,6 +181,117 @@
       "癸": ["雨", "静かに染み込み、必要なものを潤す人です。観察力とやさしさが深い支えになります。"]
     };
 
+    const ARCHETYPE = {
+      "甲": {
+        name: "未来の柱を育てる人",
+        phrase: "散らばった可能性に一本の幹を通し、時間を味方にして大きな流れを作る人。",
+        mission: "まだ形になっていない構想を、長く残る基盤へ育てること。",
+        hidden: "人が諦めかけたものの中に、伸びしろを見つける力。",
+        shadow: "急かされる環境では、本来の大きさを出す前に自分を小さく見積もりがちです。"
+      },
+      "乙": {
+        name: "美しい関係性を編む人",
+        phrase: "硬いものをやわらかくほどき、人や場が自然に呼吸できる形へ整える人。",
+        mission: "対立や違和感の中に、共存できる道筋を見つけること。",
+        hidden: "小さな変化を察知し、場の温度を整える力。",
+        shadow: "合わせすぎると、自分の本音が静かに置き去りになります。"
+      },
+      "丙": {
+        name: "世界に光を当てる人",
+        phrase: "見えにくかった価値を照らし、人の心に希望と方向感覚を取り戻させる人。",
+        mission: "あなたの明るさを、誰かが前に進むための灯台として使うこと。",
+        hidden: "場の空気を一瞬で変え、停滞した人を動かす力。",
+        shadow: "期待に応え続けるほど、暗い気持ちを隠して疲れやすくなります。"
+      },
+      "丁": {
+        name: "心の奥に火を灯す人",
+        phrase: "静かな集中力で本質を見つめ、言葉や表現に深い熱を宿す人。",
+        mission: "誰かの中に眠る感情や才能へ、そっと火を灯すこと。",
+        hidden: "わずかな違和感から核心を掘り当てる力。",
+        shadow: "ひとりで抱え込むと、熱が内側にこもりすぎます。"
+      },
+      "戊": {
+        name: "混沌に秩序を作る人",
+        phrase: "揺れている人や場に中心軸を与え、現実が動く土台を作る人。",
+        mission: "不安定な状況を見極め、人が安心して進める基盤へ再設計すること。",
+        hidden: "崩れた仕組みのどこから直せばよいかを、本能的に見抜く力。",
+        shadow: "全部を背負うと、強さが孤独へ変わりやすくなります。"
+      },
+      "己": {
+        name: "才能を育てて実らせる人",
+        phrase: "人やアイデアを受け止め、時間をかけて使える形へ育てる人。",
+        mission: "眠っている資源を見つけ、現実の豊かさへ変えること。",
+        hidden: "相手に合わせた育て方を見つける力。",
+        shadow: "面倒を見すぎると、相手の課題まで自分のものにしてしまいます。"
+      },
+      "庚": {
+        name: "突破口を切り開く人",
+        phrase: "曖昧な迷いを断ち切り、必要な変化を現実へ起こす人。",
+        mission: "停滞した状況に決断を入れ、新しい道を開くこと。",
+        hidden: "厳しい局面ほど判断が冴え、強さが磨かれる力。",
+        shadow: "正しさが強く出すぎると、人の未熟さを待てなくなります。"
+      },
+      "辛": {
+        name: "価値を磨き上げる人",
+        phrase: "粗いものの中から本物を見分け、美しく通用する形へ磨く人。",
+        mission: "妥協なく価値を磨き、人や作品の品格を高めること。",
+        hidden: "細部の違和感から、全体の質を引き上げる力。",
+        shadow: "完璧を求めるほど、自分にも他人にも厳しくなりすぎます。"
+      },
+      "壬": {
+        name: "大きな流れを読む人",
+        phrase: "個別の出来事を広い視野でつなぎ、未来の流れを先に感じ取る人。",
+        mission: "閉じた世界に風穴を開け、人や情報を次の場所へ運ぶこと。",
+        hidden: "複雑なものを一段高い視点から眺め、自由な答えを出す力。",
+        shadow: "自由を失うと、すべてが急に窮屈で無意味に感じやすくなります。"
+      },
+      "癸": {
+        name: "静かに本質を浸透させる人",
+        phrase: "急がず、押しつけず、必要な言葉や知恵を深く染み込ませる人。",
+        mission: "乾いた心や場に、理解と回復の水脈を通すこと。",
+        hidden: "見落とされている痛みや可能性に気づく力。",
+        shadow: "考え続けるほど不安が増え、動き出すタイミングを逃しがちです。"
+      }
+    };
+
+    const PROFILE_BY_RELATION = {
+      peer: {
+        title: "自分の軸で世界を組み直す人",
+        bullets: ["人に流されず、大切な価値観を守れる", "一人で深く掘るほど、本物の判断基準が育つ", "独自路線を怖がらないほど運が開く"],
+        lesson: "理解されないことを失敗と見なさないこと。あなたの深さは、少し遅れて伝わります。",
+        career: "専門家、個人ブランド、長期プロジェクト、思想や技術を積み上げる仕事",
+        money: "安売りより、積み上げた専門性を正しく価格に乗せることが豊かさの入口です。"
+      },
+      output: {
+        title: "見えない感覚を言葉と形にする人",
+        bullets: ["空気の変化や違和感を細かく拾える", "感性を表現に変えると、人の心を動かせる", "自分だけの切り口が価値になる"],
+        lesson: "繊細さを弱さとして隠さないこと。感じ取れるからこそ、作れるものがあります。",
+        career: "発信、文章、企画、デザイン、教育、編集、世界観を作る仕事",
+        money: "感性を無料で渡しすぎないこと。言語化・企画化・商品化で価値が立ち上がります。"
+      },
+      wealth: {
+        title: "人と資源を循環させる人",
+        bullets: ["相手の欲しいものを察知し、自然に差し出せる", "人・お金・情報が集まる場を作れる", "信頼を長期的な豊かさへ変えられる"],
+        lesson: "助けることと背負うことを分けること。受け取る力も才能の一部です。",
+        career: "サービス、コミュニティ運営、営業、プロデュース、顧客と長く関わる仕事",
+        money: "人のために動くほど豊かさが巡ります。ただし境界線と価格設定は先に決めてください。"
+      },
+      officer: {
+        title: "現実を動かし、結果へ導く人",
+        bullets: ["責任があるほど集中力が増す", "決める、整える、やり切る力が強い", "混乱した場に方向性を与えられる"],
+        lesson: "強さだけで進まないこと。人を動かすには、正しさに温度を添える必要があります。",
+        career: "マネジメント、改善設計、コンサル、現場責任者、成果が明確な仕事",
+        money: "成果に対して報酬を受け取る設計が向きます。責任だけ増えて収入が増えない形は見直しどころです。"
+      },
+      resource: {
+        title: "知恵を体系化し、人に渡す人",
+        bullets: ["物事の背景や原理を知りたくなる", "複雑な情報をわかりやすく翻訳できる", "学びを体系にすると、人の道しるべになる"],
+        lesson: "準備が完璧になるまで待たないこと。途中の学びも、誰かにとって価値になります。",
+        career: "研究、講座、専門コンテンツ、分析、知識を届ける仕事",
+        money: "知識を単発で消費せず、講座・教材・メソッドのように残る形へ変えるほど強くなります。"
+      }
+    };
+
     const RELATION_WORDS = {
       peer: "自分軸を整える",
       output: "表現して外へ出す",
@@ -187,6 +299,68 @@
       officer: "責任を引き受けて形にする",
       resource: "学び直し、内側を満たす"
     };
+
+    const ELEMENT_READING = {
+      "木": {
+        meaning: "成長力、企画力、人を伸ばす力が出やすい配置です。",
+        action: "考えを広げすぎた時は、優先順位を一つに絞ると流れが安定します。"
+      },
+      "火": {
+        meaning: "表現力、明るさ、伝える力が出やすい配置です。",
+        action: "熱くなりすぎた時は、静かな時間を作ると判断が戻ります。"
+      },
+      "土": {
+        meaning: "現実化、安定感、基盤を作る力が出やすい配置です。",
+        action: "抱え込みすぎた時は、役割を分けて人に渡すことが開運になります。"
+      },
+      "金": {
+        meaning: "決断力、美意識、物事を磨き上げる力が出やすい配置です。",
+        action: "厳しくなりすぎた時は、言葉に温度を足すと魅力が伝わります。"
+      },
+      "水": {
+        meaning: "知性、洞察、流れを読む力が出やすい配置です。",
+        action: "考えすぎた時は、期限と最初の一歩を決めると前に進みます。"
+      }
+    };
+
+    const TENCHUSATSU_TYPES = [
+      {
+        name: "戌亥天中殺",
+        branches: ["戌", "亥"],
+        keyword: "精神性・理想・内面の探求",
+        advice: "内省、整理、学び直しに向く時期。大きな決断は急がず、足元を整えるほど流れが戻ります。"
+      },
+      {
+        name: "申酉天中殺",
+        branches: ["申", "酉"],
+        keyword: "実務力・整理力・結果への集中",
+        advice: "成果を急ぎすぎず、仕組みの見直しや役割整理を優先すると安定します。"
+      },
+      {
+        name: "午未天中殺",
+        branches: ["午", "未"],
+        keyword: "表現力・情熱・人を育てる力",
+        advice: "目立つ勝負より、関係性や生活基盤を整えることに向く時期です。"
+      },
+      {
+        name: "辰巳天中殺",
+        branches: ["辰", "巳"],
+        keyword: "行動力・理想・リーダーシップ",
+        advice: "押し切るより、柔軟さと協調を意識すると流れを活かせます。"
+      },
+      {
+        name: "寅卯天中殺",
+        branches: ["寅", "卯"],
+        keyword: "成長力・人脈・未来を広げる力",
+        advice: "拡大よりも関係の見直し、学び直し、足場作りを優先したい時期です。"
+      },
+      {
+        name: "子丑天中殺",
+        branches: ["子", "丑"],
+        keyword: "始まり・蓄積・土台作り",
+        advice: "新しい大勝負より、準備、整理、土台の作り直しに向く時期です。"
+      }
+    ];
 
     function relationType(starName) {
       if (["貫索星", "石門星"].includes(starName)) return "peer";
@@ -211,6 +385,168 @@
       return api.annualLucks(chart, now.getFullYear(), 1)[0];
     }
 
+    function starName(value) {
+      if (!value) return "";
+      return typeof value === "string" ? value : value.name || "";
+    }
+
+    function stemMeta(stem) {
+      return api.STEMS.find((item) => item.char === stem) || { element: "", polarity: "" };
+    }
+
+    function branchMeta(branch) {
+      return api.BRANCHES.find((item) => item.char === branch) || { element: "" };
+    }
+
+    function tenchusatsuForChart(chart) {
+      return TENCHUSATSU_TYPES[Math.floor(chart.day.cycleIndex / 10)] || TENCHUSATSU_TYPES[0];
+    }
+
+    function tenchusatsuYears(chart, startYear) {
+      const tenchusatsu = tenchusatsuForChart(chart);
+      const years = [];
+      for (let year = startYear; year < startYear + 14; year += 1) {
+        const pillar = api.yearPillarForSolarYear(year);
+        if (tenchusatsu.branches.includes(pillar.branch)) {
+          years.push(`${year}年（${pillar.stem}${pillar.branch}）`);
+        }
+      }
+      return years;
+    }
+
+    function balanceReading(chart) {
+      const entries = Object.entries(chart.balance || {});
+      const max = Math.max(...entries.map(([, value]) => value), 1);
+      const strongest = entries.filter(([, value]) => value === max).map(([element]) => element);
+      const main = strongest[0] || "木";
+      const reading = ELEMENT_READING[main];
+      return {
+        title: strongest.length > 1 ? `強い五行：${strongest.join("・")}` : `強い五行：${main}`,
+        meaning: strongest.length > 1
+          ? `${strongest.join("・")}が強めです。複数の質が前に出るため、場面によって魅力の出方が変わります。`
+          : reading.meaning,
+        action: strongest.length > 1
+          ? "疲れやすい場面を観察し、休む・整理する・人に任せるなど、流れを詰まらせない工夫をしてください。"
+          : reading.action
+      };
+    }
+
+    function yinChartHtml(chart) {
+      const columns = [
+        { label: "日", pillar: chart.day, hidden: chart.hidden.day, hiddenStar: starName(chart.yang.west) },
+        { label: "月", pillar: chart.month, hidden: chart.hidden.month, hiddenStar: starName(chart.yang.center) },
+        { label: "年", pillar: chart.year, hidden: chart.hidden.year, hiddenStar: starName(chart.yang.east) }
+      ];
+      return `
+        <section class="basis-panel basis-wide">
+          <div class="basis-panel-head">
+            <h3>陰占</h3>
+            <span>節入りから ${chart.elapsedDays.toFixed(2)} 日目</span>
+          </div>
+          <div class="yin-table">
+            <div class="yin-row yin-head"><div></div>${columns.map((col) => `<div>${col.label}</div>`).join("")}</div>
+            <div class="yin-row">
+              <strong>天干</strong>
+              ${columns.map((col) => {
+                const meta = stemMeta(col.pillar.stem);
+                return `<div><b>${col.pillar.stem}</b><small>${meta.element} / ${meta.polarity}</small></div>`;
+              }).join("")}
+            </div>
+            <div class="yin-row">
+              <strong>地支</strong>
+              ${columns.map((col) => {
+                const meta = branchMeta(col.pillar.branch);
+                return `<div><b>${col.pillar.branch}</b><small>${meta.element}</small></div>`;
+              }).join("")}
+            </div>
+            <div class="yin-row">
+              <strong>蔵干</strong>
+              ${columns.map((col) => `<div><b>${col.hidden}</b><small>${col.hiddenStar}</small></div>`).join("")}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
+    function yangChartHtml(chart) {
+      const cells = [
+        { place: "右肩", value: "", extra: "", empty: true },
+        { place: "頭 / 北", value: starName(chart.yang.north), extra: "目上・親" },
+        { place: "左肩 / 初年運", value: chart.yang.early.name, extra: `${chart.yang.early.energy}点` },
+        { place: "右手 / 西", value: starName(chart.yang.west), extra: "家庭・配偶者" },
+        { place: "胸 / 中央", value: starName(chart.yang.center), extra: "自分の価値観" },
+        { place: "左手 / 東", value: starName(chart.yang.east), extra: "友人・社会" },
+        { place: "右足 / 晩年運", value: chart.yang.later.name, extra: `${chart.yang.later.energy}点` },
+        { place: "腹 / 南", value: starName(chart.yang.south), extra: "部下・子供" },
+        { place: "左足 / 中年運", value: chart.yang.middle.name, extra: `${chart.yang.middle.energy}点` }
+      ];
+      return `
+        <section class="basis-panel basis-wide">
+          <div class="basis-panel-head">
+            <h3>陽占</h3>
+            <span>人体星図</span>
+          </div>
+          <div class="yang-chart">
+            ${cells.map((cell) => `
+              <div class="yang-box ${cell.empty ? "empty" : ""}">
+                <small>${cell.place}</small>
+                <b>${cell.value || " "}</b>
+                <span>${cell.extra}</span>
+              </div>
+            `).join("")}
+          </div>
+        </section>
+      `;
+    }
+
+    function balanceHtml(chart) {
+      const max = Math.max(...Object.values(chart.balance || {}), 1);
+      const reading = balanceReading(chart);
+      return `
+        <section class="basis-panel">
+          <div class="basis-panel-head">
+            <h3>五行バランス</h3>
+            <span>天干・地支・蔵干</span>
+          </div>
+          <div class="balance-list">
+            ${api.ELEMENT_ORDER.map((element) => `
+              <div class="balance-row">
+                <strong>${element}</strong>
+                <div class="balance-track"><i class="element-${element}" style="width:${chart.balance[element] / max * 100}%"></i></div>
+                <span>${chart.balance[element]}</span>
+              </div>
+            `).join("")}
+          </div>
+          <div class="basis-note">
+            <b>${reading.title}</b>
+            <p>${reading.meaning}</p>
+            <p>${reading.action}</p>
+          </div>
+        </section>
+      `;
+    }
+
+    function tenchusatsuHtml(chart, now) {
+      const tenchusatsu = tenchusatsuForChart(chart);
+      const years = tenchusatsuYears(chart, now.getFullYear());
+      return `
+        <section class="basis-panel">
+          <div class="basis-panel-head">
+            <h3>天中殺</h3>
+            <span>整理と見直しの時期</span>
+          </div>
+          <div class="tenchu-card">
+            <b>${tenchusatsu.name}</b>
+            <span>${tenchusatsu.keyword}</span>
+            <p>${tenchusatsu.branches.join("・")}の年が天中殺年です。${tenchusatsu.advice}</p>
+          </div>
+          <div class="year-chips">
+            ${years.map((year) => `<span>${year}</span>`).join("")}
+          </div>
+        </section>
+      `;
+    }
+
     function makeCard(title, body, meta) {
       return `
         <article class="reading-card">
@@ -219,6 +555,10 @@
           ${meta ? `<p class="card-meta">${meta}</p>` : ""}
         </article>
       `;
+    }
+
+    function listItems(items) {
+      return `<ul class="mini-list">${items.map((item) => `<li>${item}</li>`).join("")}</ul>`;
     }
 
     function periodText(monthStar, yearStar, label) {
@@ -239,57 +579,71 @@
       const now = new Date();
       const monthLuck = currentMonthlyLuck(chart, now);
       const yearLuck = annualLuck(chart, now);
-      const center = chart.yang.center.name;
-      const south = chart.yang.south.name;
+      const center = starName(chart.yang.center);
+      const south = starName(chart.yang.south);
+      const monthStar = starName(monthLuck.tenStar);
+      const yearStar = starName(yearLuck.tenStar);
       const dayStem = chart.day.stem;
       const essence = DAY_STEM[dayStem] || DAY_STEM["甲"];
       const core = TEN_STAR[center] || TEN_STAR["玉堂星"];
       const talent = TEN_STAR[south] || core;
-      const month = TEN_STAR[monthLuck.tenStar.name] || core;
-      const year = TEN_STAR[yearLuck.tenStar.name] || month;
+      const month = TEN_STAR[monthStar] || core;
+      const year = TEN_STAR[yearStar] || month;
+      const archetype = ARCHETYPE[dayStem] || ARCHETYPE["戊"];
+      const profile = PROFILE_BY_RELATION[relationType(center)] || PROFILE_BY_RELATION.resource;
+      const monthProfile = PROFILE_BY_RELATION[relationType(monthStar)] || profile;
 
       $("#reading").hidden = false;
-      $("#readingTitle").textContent = `${essence[0]}の質を持つあなたへ`;
+      $("#readingTitle").textContent = `${archetype.name}としてのあなたへ`;
       $("#readingDate").textContent = `${formatDate(now)} 現在の流れ`;
 
       $("#primaryCards").innerHTML = [
-        makeCard("本質", `<h3>${essence[0]}のような人</h3><p>${essence[1]}</p><p>${core.gift}も中心にあります。</p>`),
-        makeCard("才能", `<h3>${talent.talent}</h3><p>${talent.gift}を外へ表すほど、あなたの魅力は伝わります。</p>`),
-        makeCard("影のパターン", `<h3>力が偏った時のサイン</h3><p>${core.shadow}</p><p>責めるためではなく、戻る場所を知るためのヒントです。</p>`),
-        makeCard("今月のテーマ", `<h3>${month.gift}</h3><p>${month.work}</p>`, `${formatDate(monthLuck.start)} から ${formatDate(monthLuck.end)} まで`)
+        makeCard("コア性格プロファイル", `<h3>${profile.title}</h3><p class="statement">${archetype.phrase}</p>${listItems(profile.bullets)}<p>${core.gift}が人生の中心で働いています。</p>`),
+        makeCard("隠れた強み", `<h3>${archetype.hidden}</h3><p>あなたは、本人がまだ気づいていない可能性や、場の中で絡まっている問題を見つけるのが得意です。</p><p>${talent.gift}を外へ出すほど、その力は人に伝わります。</p>`),
+        makeCard("影の側面", `<h3>強みが偏った時のサイン</h3><p>${archetype.shadow}</p><p>${core.shadow}</p><p>影は欠点ではなく、才能の使い方を調整する合図です。</p>`),
+        makeCard("今月のテーマ", `<h3>${month.gift}</h3><p>${month.work}</p><p>今月は「${monthProfile.title}」としての動き方が追い風になります。</p>`, `${formatDate(monthLuck.start)} から ${formatDate(monthLuck.end)} まで`)
+      ].join("");
+
+      $("#missionCards").innerHTML = [
+        makeCard("運命の地図", `<h3>${archetype.mission}</h3><p class="quote">あなたの人生テーマは、単なる成功ではなく「本来の形を取り戻すこと」です。</p><p>情報、人間関係、仕事、心の状態。乱れたものを見た時、あなたの中の羅針盤が動き始めます。</p>`),
+        makeCard("ソウルパーパス", `<h3>${profile.title}</h3><p>${profile.lesson}</p><p>世界への貢献は、複雑なものを整理し、人が一歩進める形へ翻訳することです。</p>`),
+        makeCard("アラインメントの兆候", `<h3>流れに乗っている時</h3>${listItems(["深く集中できる", "人と話していて核心に触れる感覚がある", "身体感覚が軽い", "時間感覚が静かに消える"])}<p>この感覚が増えている時、あなたは自分の使い方を思い出しています。</p>`),
+        makeCard("ミスアラインメントの兆候", `<h3>ズレている時</h3>${listItems(["イライラが増える", "人への失望が強くなる", "睡眠や身体の違和感が出る", "全部自分でやった方が早いと感じる"])}<p>このサインが出たら、能力不足ではなく、背負いすぎの可能性があります。</p>`)
       ].join("");
 
       $("#flowCards").innerHTML = ["今週", "28日間", "3か月", "半年", "1年"].map((label) => {
-        return makeCard(label, `<p>${periodText(monthLuck.tenStar.name, yearLuck.tenStar.name, label)}</p>`);
+        return makeCard(label, `<p>${periodText(monthStar, yearStar, label)}</p>`);
       }).join("");
 
       $("#supportCards").innerHTML = [
-        makeCard("今月の仕事運", `<p>${month.work}</p><p>キーワードは「${RELATION_WORDS[relationType(monthLuck.tenStar.name)]}」。成果より先に、流れを整える意識が助けになります。</p>`),
-        makeCard("今月の恋愛運", `<p>${month.love}</p>`),
-        makeCard("相性の良いパートナー", `<p>${month.partner}</p><p>長く続く関係では、あなたの本質である「${essence[0]}」のペースを大切にしてくれることが鍵です。</p>`),
-        makeCard("開運アクション", `<p>${month.action}</p>`)
+        makeCard("キャリアの運命探知機", `<h3>${monthProfile.career}</h3><p>${month.work}</p><p>キーワードは「${RELATION_WORDS[relationType(monthStar)]}」。今月は才能を気分で終わらせず、再現できる形にするほど強くなります。</p>`),
+        makeCard("関係性運命図", `<h3>深く繋がれる相手を選ぶ</h3><p>${month.love}</p><p>相性が良いのは、${month.partner}です。救う関係より、共に世界を作る関係が向いています。</p>`),
+        makeCard("富と豊かさのコード", `<h3>価値を安く渡しすぎない</h3><p>${monthProfile.money}</p><p>あなたの豊かさは、才能を単発で消耗するより、知識・仕組み・関係性として残すほど育ちます。</p>`),
+        makeCard("実行プラン", `<h3>今すぐ流れを変える一手</h3>${listItems([`今日：${month.action}`, "今月：本当にやるべきことを3つだけ残す", "今年：自分がいなくても回る仕組みを1つ作る"])}<p>開運は特別な儀式より、才能が通る生活設計から始まります。</p>`)
       ].join("");
 
       $("#basisContent").innerHTML = `
         <div class="basis-grid">
-          <div>
-            <h3>命式</h3>
-            <p>年柱：${chart.year.stem}${chart.year.branch}</p>
-            <p>月柱：${chart.month.stem}${chart.month.branch}</p>
-            <p>日柱：${chart.day.stem}${chart.day.branch}</p>
+          ${yinChartHtml(chart)}
+          <div class="basis-side">
+            ${balanceHtml(chart)}
+            ${tenchusatsuHtml(chart, now)}
           </div>
-          <div>
-            <h3>読み解きに使った星</h3>
-            <p>中心：${chart.yang.center.name}</p>
-            <p>才能：${chart.yang.south.name}</p>
-            <p>今月：${monthLuck.stem}${monthLuck.branch} / ${monthLuck.tenStar.name}</p>
-            <p>今年：${yearLuck.stem}${yearLuck.branch} / ${yearLuck.tenStar.name}</p>
-          </div>
-          <div>
-            <h3>補足</h3>
-            <p>本文では専門用語を直接出さず、星の働きを日常の言葉へ翻訳しています。</p>
-            <p>節入り：${monthLuck.sectionName || "今月"} / ${formatDate(monthLuck.start)}</p>
-          </div>
+          ${yangChartHtml(chart)}
+          <section class="basis-panel basis-wide">
+            <div class="basis-panel-head">
+              <h3>本文への翻訳</h3>
+              <span>専門語を日常語へ</span>
+            </div>
+            <div class="translation-grid">
+              <p>中心の質：${center} → ${core.gift}</p>
+              <p>外に出る才能：${south} → ${talent.talent}</p>
+              <p>今月の流れ：${monthLuck.stem}${monthLuck.branch} / ${monthStar} → ${month.gift}</p>
+              <p>今年の流れ：${yearLuck.stem}${yearLuck.branch} / ${yearStar} → ${year.gift}</p>
+              <p>節入り：${monthLuck.sectionName || "今月"} / ${formatDate(monthLuck.start)}</p>
+              <p>本文では専門用語を前面に出さず、星の働きを日常の言葉へ翻訳しています。</p>
+            </div>
+          </section>
         </div>
       `;
     }
