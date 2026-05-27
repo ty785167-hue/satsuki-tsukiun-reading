@@ -112,7 +112,7 @@ h1 span {
 
 form {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
   align-items: end;
 }
@@ -120,6 +120,10 @@ form {
 .field {
   display: grid;
   gap: 7px;
+}
+
+.birth-field {
+  min-width: 0;
 }
 
 .field span {
@@ -140,6 +144,26 @@ select {
   color: var(--ink);
 }
 
+.date-selects {
+  display: grid;
+  grid-template-columns: minmax(96px, 1.35fr) minmax(76px, 0.85fr) minmax(76px, 0.85fr);
+  gap: 8px;
+}
+
+.date-selects label {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 5px;
+  align-items: center;
+}
+
+.date-selects small {
+  color: var(--muted);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+  font-size: 12px;
+  font-weight: 800;
+}
+
 button {
   min-height: 46px;
   border: 0;
@@ -150,6 +174,10 @@ button {
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
+}
+
+form button {
+  justify-self: start;
 }
 
 button:hover {
@@ -510,6 +538,26 @@ button:focus {
   font-weight: 700;
 }
 
+.tenchu-months {
+  margin-top: 14px;
+  border-top: 1px solid var(--line);
+  padding-top: 12px;
+}
+
+.tenchu-months > b {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--accent-dark);
+}
+
+.tenchu-months p {
+  margin: 0 0 8px;
+}
+
+.tenchu-months strong {
+  color: var(--ink);
+}
+
 .translation-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -571,6 +619,10 @@ button:focus {
 
   .input-card {
     padding: 16px;
+  }
+
+  .date-selects {
+    grid-template-columns: 1fr 1fr 1fr;
   }
 
   .reading-head {
