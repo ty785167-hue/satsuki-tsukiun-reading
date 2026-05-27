@@ -10,7 +10,7 @@
 <body>
   <main class="app">
     <section class="hero">
-      <p class="eyebrow">SATSUKI monthly reading</p>
+      <p class="eyebrow">produced by SATSUKI</p>
       <h1>あなたの宿命鑑定<br><span>-月運読み解き版-</span></h1>
       <p class="lead">
         生年月日から命式を算出し、本質・才能・今月のテーマ・これからの流れを、
@@ -24,14 +24,44 @@
         <p>出生時間がわからない場合は空欄で大丈夫です。</p>
       </div>
       <form id="readingForm">
-        <label class="field">
+        <div class="field birth-field">
           <span>生年月日</span>
-          <input id="birthDate" type="date" required>
-        </label>
+          <div class="date-selects">
+            <label>
+              <select id="birthYear" required aria-label="生年"></select>
+              <small>年</small>
+            </label>
+            <label>
+              <select id="birthMonth" required aria-label="生月"></select>
+              <small>月</small>
+            </label>
+            <label>
+              <select id="birthDay" required aria-label="生日"></select>
+              <small>日</small>
+            </label>
+          </div>
+        </div>
         <label class="field">
           <span>出生時間</span>
           <input id="birthTime" type="time">
         </label>
+        <div class="field today-field">
+          <span>鑑定日</span>
+          <div class="date-selects compact">
+            <label>
+              <select id="todayYear" required aria-label="鑑定年"></select>
+              <small>年</small>
+            </label>
+            <label>
+              <select id="todayMonth" required aria-label="鑑定月"></select>
+              <small>月</small>
+            </label>
+            <label>
+              <select id="todayDay" required aria-label="鑑定日"></select>
+              <small>日</small>
+            </label>
+          </div>
+        </div>
         <label class="field">
           <span>大きな運の流れ</span>
           <select id="gender">
@@ -362,6 +392,19 @@
       }
     ];
 
+    const PHASE_RULES = [
+      { name: "支合", branches: [["子", "丑"], ["寅", "亥"], ["卯", "戌"], ["辰", "酉"], ["巳", "申"], ["午", "未"]], tone: "まとまりやすい流れ", text: "人との縁や物事がまとまりやすい日です。約束、調整、関係づくりに向きます。" },
+      { name: "対冲", branches: [["子", "午"], ["丑", "未"], ["寅", "申"], ["卯", "酉"], ["辰", "戌"], ["巳", "亥"]], tone: "切り替えが起きやすい流れ", text: "予定変更や気持ちの揺れが出やすい日です。無理に押し切らず、見直しや方向転換に使うと運が整います。" },
+      { name: "害", branches: [["子", "未"], ["丑", "午"], ["寅", "巳"], ["卯", "辰"], ["申", "亥"], ["酉", "戌"]], tone: "小さなズレに気づく流れ", text: "言葉の行き違いや違和感が出やすい日です。確認を増やし、曖昧なまま進めないことが大切です。" },
+      { name: "破", branches: [["子", "酉"], ["丑", "辰"], ["寅", "亥"], ["卯", "午"], ["巳", "申"], ["未", "戌"]], tone: "古い形がほどける流れ", text: "前提が崩れたり、予定を組み替えたくなる日です。壊れるものを責めず、より合う形へ直す視点を持ってください。" },
+      { name: "刑", branches: [["子", "卯"], ["寅", "巳"], ["巳", "申"], ["申", "寅"], ["丑", "戌"], ["戌", "未"], ["未", "丑"], ["辰", "辰"], ["午", "午"], ["酉", "酉"], ["亥", "亥"]], tone: "内側の圧が出やすい流れ", text: "焦りやこだわりが強く出やすい日です。正しさを急がず、身体を緩めてから判断すると安定します。" }
+    ];
+
+    const GROUP_PHASES = [
+      { name: "三合", groups: [["申", "子", "辰"], ["亥", "卯", "未"], ["寅", "午", "戌"], ["巳", "酉", "丑"]], tone: "才能がまとまる流れ", text: "点だったものが線になりやすい日です。企画、発信、共同作業など、複数の要素を一つにまとめる行動が向きます。" },
+      { name: "方三位", groups: [["寅", "卯", "辰"], ["巳", "午", "未"], ["申", "酉", "戌"], ["亥", "子", "丑"]], tone: "同じ方向へ勢いが出る流れ", text: "流れに勢いが出やすい日です。やることを絞ると進みますが、広げすぎると疲れやすいので一点集中が鍵です。" }
+    ];
+
     function relationType(starName) {
       if (["貫索星", "石門星"].includes(starName)) return "peer";
       if (["鳳閣星", "調舒星"].includes(starName)) return "output";
@@ -373,6 +416,75 @@
     function formatDate(date) {
       if (!date) return "";
       return new Intl.DateTimeFormat("ja-JP", { year: "numeric", month: "long", day: "numeric" }).format(date);
+    }
+
+    function pad2(value) {
+      return String(value).padStart(2, "0");
+    }
+
+    function daysInMonth(year, month) {
+      return new Date(year, month, 0).getDate();
+    }
+
+    function setSelectOptions(select, values, selectedValue) {
+      select.innerHTML = values.map((value) => {
+        const selected = String(value) === String(selectedValue) ? " selected" : "";
+        return `<option value="${value}"${selected}>${value}</option>`;
+      }).join("");
+    }
+
+    function updateDateDayOptions(prefix) {
+      const year = Number($(`#${prefix}Year`).value);
+      const month = Number($(`#${prefix}Month`).value);
+      const daySelect = $(`#${prefix}Day`);
+      const currentDay = Number(daySelect.value) || 1;
+      const maxDay = daysInMonth(year, month);
+      const selectedDay = Math.min(currentDay, maxDay);
+      setSelectOptions(daySelect, Array.from({ length: maxDay }, (_, index) => index + 1), selectedDay);
+    }
+
+    function updateBirthDayOptions() {
+      updateDateDayOptions("birth");
+    }
+
+    function updateTodayDayOptions() {
+      updateDateDayOptions("today");
+    }
+
+    function dateValue(prefix) {
+      const year = $(`#${prefix}Year`).value;
+      const month = pad2($(`#${prefix}Month`).value);
+      const day = pad2($(`#${prefix}Day`).value);
+      return `${year}-${month}-${day}`;
+    }
+
+    function birthDateValue() {
+      return dateValue("birth");
+    }
+
+    function todayDateValue() {
+      return dateValue("today");
+    }
+
+    function parseDateValue(value) {
+      const [year, month, day] = value.split("-").map(Number);
+      return { year, month, day };
+    }
+
+    function jstDateFromValue(value) {
+      const { year, month, day } = parseDateValue(value);
+      return api.makeJstDate(year, month, day, 12, 0);
+    }
+
+    function populateDateSelects(prefix, selectedDate) {
+      const currentYear = new Date().getFullYear();
+      const years = Array.from({ length: currentYear - 1919 + 11 }, (_, index) => currentYear + 10 - index);
+      setSelectOptions($(`#${prefix}Year`), years, selectedDate.year);
+      setSelectOptions($(`#${prefix}Month`), Array.from({ length: 12 }, (_, index) => index + 1), selectedDate.month);
+      setSelectOptions($(`#${prefix}Day`), Array.from({ length: 31 }, (_, index) => index + 1), selectedDate.day);
+      $(`#${prefix}Year`).addEventListener("change", () => updateDateDayOptions(prefix));
+      $(`#${prefix}Month`).addEventListener("change", () => updateDateDayOptions(prefix));
+      updateDateDayOptions(prefix);
     }
 
     function currentMonthlyLuck(chart, now) {
@@ -412,6 +524,20 @@
         }
       }
       return years;
+    }
+
+    function tenchusatsuMonths(chart, year) {
+      const tenchusatsu = tenchusatsuForChart(chart);
+      return api.monthlyLucks(chart, year)
+        .filter((month) => tenchusatsu.branches.includes(month.branch))
+        .map((month) => {
+          const start = formatDate(month.start);
+          const end = month.end ? formatDate(month.end) : "";
+          return {
+            label: `${month.sectionName}（${month.stem}${month.branch}）`,
+            period: end ? `${start} から ${end} まで` : `${start} から`
+          };
+        });
     }
 
     function balanceReading(chart) {
@@ -529,6 +655,7 @@
     function tenchusatsuHtml(chart, now) {
       const tenchusatsu = tenchusatsuForChart(chart);
       const years = tenchusatsuYears(chart, now.getFullYear());
+      const months = tenchusatsuMonths(chart, now.getFullYear());
       return `
         <section class="basis-panel">
           <div class="basis-panel-head">
@@ -542,6 +669,99 @@
           </div>
           <div class="year-chips">
             ${years.map((year) => `<span>${year}</span>`).join("")}
+          </div>
+          <div class="tenchu-months">
+            <b>${now.getFullYear()}年の月の天中殺</b>
+            ${months.length
+              ? months.map((month) => `<p><strong>${month.label}</strong><br>${month.period}</p>`).join("")
+              : `<p>この年の月運データ内には、該当する月の天中殺が見つかりませんでした。</p>`}
+          </div>
+        </section>
+      `;
+    }
+
+    function phaseHits(chart, dailyPillar) {
+      const natalBranches = [
+        { label: "日支", branch: chart.day.branch },
+        { label: "月支", branch: chart.month.branch },
+        { label: "年支", branch: chart.year.branch }
+      ];
+      const hits = [];
+
+      PHASE_RULES.forEach((rule) => {
+        natalBranches.forEach((natal) => {
+          const matched = rule.branches.some((pair) => pair.includes(dailyPillar.branch) && pair.includes(natal.branch));
+          if (matched) {
+            hits.push({ name: rule.name, tone: rule.tone, text: rule.text, target: natal.label, branches: `${dailyPillar.branch}-${natal.branch}` });
+          }
+        });
+      });
+
+      GROUP_PHASES.forEach((rule) => {
+        rule.groups.forEach((group) => {
+          const natalInGroup = natalBranches.filter((natal) => group.includes(natal.branch));
+          const unique = new Set([dailyPillar.branch, ...natalInGroup.map((natal) => natal.branch)]);
+          if (group.includes(dailyPillar.branch) && natalInGroup.length >= 1 && unique.size >= 2) {
+            hits.push({
+              name: natalInGroup.length >= 2 && unique.size >= 3 ? rule.name : `${rule.name}の気配`,
+              tone: rule.tone,
+              text: rule.text,
+              target: natalInGroup.map((natal) => natal.label).join("・"),
+              branches: group.join("")
+            });
+          }
+        });
+      });
+
+      return hits;
+    }
+
+    function dailyReading(chart, targetDate) {
+      const dailyPillar = api.dayPillarForDate(targetDate);
+      const dailyStar = api.tenStar(chart.day.stem, dailyPillar.stem);
+      const dailyLife = api.lifeStar(chart.day.stem, dailyPillar.branch);
+      const star = TEN_STAR[dailyStar] || TEN_STAR["玉堂星"];
+      const phases = phaseHits(chart, dailyPillar);
+      const mainPhase = phases[0];
+      const phaseText = mainPhase
+        ? `${mainPhase.tone}です。${mainPhase.text}`
+        : "大きな揺れよりも、自分のペースを整えやすい日です。いつもの習慣を丁寧に扱うほど運が安定します。";
+      const action = mainPhase
+        ? `${star.action} そのうえで、${mainPhase.name}の流れを活かすために「確認・調整・余白」を一つ増やしてください。`
+        : star.action;
+
+      return {
+        pillar: dailyPillar,
+        starName: dailyStar,
+        lifeStar: dailyLife,
+        star,
+        phases,
+        title: `${dailyPillar.stem}${dailyPillar.branch}の日`,
+        fortune: `今日は「${star.gift}」を使う日です。${phaseText}`,
+        action
+      };
+    }
+
+    function dailyBasisHtml(chart, daily) {
+      return `
+        <section class="basis-panel basis-wide">
+          <div class="basis-panel-head">
+            <h3>今日の鑑定根拠</h3>
+            <span>歳時記の干支と位相法</span>
+          </div>
+          <div class="daily-basis">
+            <div>
+              <b>鑑定日の干支</b>
+              <p>${daily.pillar.stem}${daily.pillar.branch} / ${daily.starName} → ${daily.star.gift}</p>
+              <p>十二大従星：${daily.lifeStar.name}（${daily.lifeStar.energy}点）</p>
+            </div>
+            <div>
+              <b>生年月日との関係</b>
+              <p>日支：${chart.day.branch}　月支：${chart.month.branch}　年支：${chart.year.branch}</p>
+              ${daily.phases.length
+                ? `<ul class="mini-list">${daily.phases.map((hit) => `<li>${hit.name}：${hit.branches}（${hit.target}）→ ${hit.tone}</li>`).join("")}</ul>`
+                : `<p>大きな位相法の反応は控えめ。日常の整え直しに向く日です。</p>`}
+            </div>
           </div>
         </section>
       `;
@@ -576,7 +796,8 @@
     }
 
     function buildReading(chart) {
-      const now = new Date();
+      const now = jstDateFromValue(todayDateValue());
+      const daily = dailyReading(chart, now);
       const monthLuck = currentMonthlyLuck(chart, now);
       const yearLuck = annualLuck(chart, now);
       const center = starName(chart.yang.center);
@@ -595,9 +816,11 @@
 
       $("#reading").hidden = false;
       $("#readingTitle").textContent = `${archetype.name}としてのあなたへ`;
-      $("#readingDate").textContent = `${formatDate(now)} 現在の流れ`;
+      $("#readingDate").textContent = `${formatDate(now)} の流れ`;
 
       $("#primaryCards").innerHTML = [
+        makeCard("今日の運勢", `<h3>${daily.title}</h3><p>${daily.fortune}</p>`, `歳時記の干支：${daily.pillar.stem}${daily.pillar.branch}`),
+        makeCard("今日の行動アドバイス", `<h3>運を動かす一手</h3><p>${daily.action}</p><p>今日は完璧に進めるより、流れを読みながら微調整するほど運が開きます。</p>`),
         makeCard("コア性格プロファイル", `<h3>${profile.title}</h3><p class="statement">${archetype.phrase}</p>${listItems(profile.bullets)}<p>${core.gift}が人生の中心で働いています。</p>`),
         makeCard("隠れた強み", `<h3>${archetype.hidden}</h3><p>あなたは、本人がまだ気づいていない可能性や、場の中で絡まっている問題を見つけるのが得意です。</p><p>${talent.gift}を外へ出すほど、その力は人に伝わります。</p>`),
         makeCard("影の側面", `<h3>強みが偏った時のサイン</h3><p>${archetype.shadow}</p><p>${core.shadow}</p><p>影は欠点ではなく、才能の使い方を調整する合図です。</p>`),
@@ -617,7 +840,7 @@
 
       $("#supportCards").innerHTML = [
         makeCard("キャリアの運命探知機", `<h3>${monthProfile.career}</h3><p>${month.work}</p><p>キーワードは「${RELATION_WORDS[relationType(monthStar)]}」。今月は才能を気分で終わらせず、再現できる形にするほど強くなります。</p>`),
-        makeCard("関係性運命図", `<h3>深く繋がれる相手を選ぶ</h3><p>${month.love}</p><p>相性が良いのは、${month.partner}です。救う関係より、共に世界を作る関係が向いています。</p>`),
+        makeCard("ご縁を深める相手", `<h3>深く繋がれる相手を選ぶ</h3><p>${month.love}</p><p>相性が良いのは、${month.partner}です。救う関係より、共に世界を作る関係が向いています。</p>`),
         makeCard("富と豊かさのコード", `<h3>価値を安く渡しすぎない</h3><p>${monthProfile.money}</p><p>あなたの豊かさは、才能を単発で消耗するより、知識・仕組み・関係性として残すほど育ちます。</p>`),
         makeCard("実行プラン", `<h3>今すぐ流れを変える一手</h3>${listItems([`今日：${month.action}`, "今月：本当にやるべきことを3つだけ残す", "今年：自分がいなくても回る仕組みを1つ作る"])}<p>開運は特別な儀式より、才能が通る生活設計から始まります。</p>`)
       ].join("");
@@ -630,6 +853,7 @@
             ${tenchusatsuHtml(chart, now)}
           </div>
           ${yangChartHtml(chart)}
+          ${dailyBasisHtml(chart, daily)}
           <section class="basis-panel basis-wide">
             <div class="basis-panel-head">
               <h3>本文への翻訳</h3>
@@ -650,7 +874,8 @@
 
     function setDefaults() {
       const today = new Date();
-      $("#birthDate").value = "1990-01-01";
+      populateDateSelects("birth", { year: 1990, month: 1, day: 1 });
+      populateDateSelects("today", { year: today.getFullYear(), month: today.getMonth() + 1, day: today.getDate() });
       $("#gender").value = "female";
       $("#notice").textContent = api ? "" : "sanmeigaku.js を同じ階層に置くと鑑定を実行できます。";
       if (today.getHours() < 5) $("#birthTime").value = "";
@@ -664,7 +889,7 @@
       }
       try {
         const chart = api.calculateNatal({
-          dateValue: $("#birthDate").value,
+          dateValue: birthDateValue(),
           timeValue: $("#birthTime").value || "12:00",
           gender: $("#gender").value,
           targetYear: new Date().getFullYear()
