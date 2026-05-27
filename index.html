@@ -23,6 +23,10 @@
         <p>出生時間がわからない場合は空欄で大丈夫です。</p>
       </div>
       <form id="readingForm">
+        <label class="field">
+          <span>お名前</span>
+          <input id="userName" type="text" placeholder="例：さつき" autocomplete="name">
+        </label>
         <div class="field birth-field">
           <span>生年月日</span>
           <div class="date-selects">
@@ -501,6 +505,21 @@
       return typeof value === "string" ? value : value.name || "";
     }
 
+    function displayName() {
+      const raw = ($("#userName").value || "").trim();
+      return raw || "あなた";
+    }
+
+    function honorificName() {
+      const name = displayName();
+      if (name === "あなた") return name;
+      return /(さん|様|ちゃん|くん)$/.test(name) ? name : `${name}さん`;
+    }
+
+    function personalize(text, name = honorificName()) {
+      return String(text).replaceAll("あなた", name);
+    }
+
     function stemMeta(stem) {
       return api.STEMS.find((item) => item.char === stem) || { element: "", polarity: "" };
     }
@@ -770,8 +789,8 @@
       return `
         <article class="reading-card">
           <p class="card-label">${title}</p>
-          <div class="card-body">${body}</div>
-          ${meta ? `<p class="card-meta">${meta}</p>` : ""}
+          <div class="card-body">${personalize(body)}</div>
+          ${meta ? `<p class="card-meta">${personalize(meta)}</p>` : ""}
         </article>
       `;
     }
@@ -814,7 +833,7 @@
       const monthProfile = PROFILE_BY_RELATION[relationType(monthStar)] || profile;
 
       $("#reading").hidden = false;
-      $("#readingTitle").textContent = `${archetype.name}としてのあなたへ`;
+      $("#readingTitle").textContent = `${archetype.name}としての${honorificName()}へ`;
       $("#readingDate").textContent = `${formatDate(now)} の流れ`;
 
       $("#primaryCards").innerHTML = [
